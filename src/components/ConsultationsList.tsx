@@ -242,7 +242,7 @@ export const ConsultationsList = () => {
 
   if (consultations.length === 0) {
     return (
-      <div className="max-w-2xl mx-auto px-4">
+      <div className="max-w-md mx-auto px-4">
         <Card className="text-center py-12">
           <CardContent>
             <Stethoscope className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -266,7 +266,7 @@ export const ConsultationsList = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 space-y-6">
+    <div className="max-w-md mx-auto px-4 space-y-6">
       {/* Header com filtros */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
@@ -318,7 +318,7 @@ export const ConsultationsList = () => {
       </div>
 
       {/* Grupos de consultas */}
-      <div className="space-y-6">
+      <div className="space-y-6 w-full">
         {statusFilter === 'todas' || statusFilter === 'proximas' ? (
           renderGroupSection(
             "Próximas Consultas",
