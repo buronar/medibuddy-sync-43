@@ -269,7 +269,7 @@ export const ConsultationsList = () => {
     <div className="max-w-2xl mx-auto px-4 space-y-6">
       {/* Header com filtros */}
       <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <h2 className="text-lg font-semibold">Consultas ({consultations.length})</h2>
           <Button onClick={() => setCreateModalOpen(true)} size="sm">
             <Plus className="h-4 w-4 mr-2" />
@@ -278,7 +278,7 @@ export const ConsultationsList = () => {
         </div>
 
         {/* Filtros */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 items-center">
           <Button
             variant={statusFilter === 'todas' ? 'default' : 'outline'}
             size="sm"
