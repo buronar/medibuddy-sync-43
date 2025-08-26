@@ -182,14 +182,14 @@ export const ConsultationsList = () => {
   };
   const renderGroupSection = (title: string, consultations: Consultation[], icon: React.ReactNode, emptyMessage: string) => {
     if (consultations.length === 0) return null;
-    return <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
+    return <section className="w-full rounded-xl border bg-card overflow-hidden">
+        <div className="px-4 py-3">
+          <div className="text-base font-semibold flex items-center gap-2">
             {icon}
             {title} ({consultations.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
+          </div>
+        </div>
+        <div className="px-4 pb-4">
           <motion.div className="space-y-3" initial={{
           opacity: 0
         }} animate={{
@@ -199,8 +199,8 @@ export const ConsultationsList = () => {
         }}>
             {consultations.map((consultation, index) => renderConsultationCard(consultation, index))}
           </motion.div>
-        </CardContent>
-      </Card>;
+        </div>
+      </section>;
   };
   if (consultations.length === 0) {
     return <div className="max-w-md mx-auto px-4">
@@ -226,7 +226,7 @@ export const ConsultationsList = () => {
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <h2 className="text-lg font-semibold">Consultas ({consultations.length})</h2>
-          <Button onClick={() => setCreateModalOpen(true)} size="sm" className="mx-[27px]">
+          <Button onClick={() => setCreateModalOpen(true)} size="sm">
             <Plus className="h-4 w-4 mr-2" />
             Nova Consulta
           </Button>
