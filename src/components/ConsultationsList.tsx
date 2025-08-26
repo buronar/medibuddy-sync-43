@@ -3,18 +3,21 @@ import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Stethoscope, Mic, Play, Calendar, Trash2, ChevronRight, Clock, CheckCircle, CalendarClock } from "lucide-react";
+import { Plus, Stethoscope, Mic, Play, Calendar, Trash2, ChevronRight, Clock, CheckCircle, CalendarClock, AlertCircle, XCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useConsultations, type Consultation } from "@/contexts/ConsultationsContext";
 import { useRecordings } from "@/contexts/RecordingsContext";
 import { CreateConsultationModal } from "./CreateConsultationModal";
 import { RecordingModal } from "./RecordingModal";
+import { ConfirmationNudge } from "./ConfirmationNudge";
 import { useToast } from "@/hooks/use-toast";
-type StatusFilter = 'todas' | 'proximas' | 'aguardando' | 'realizadas';
+type StatusFilter = 'todas' | 'proximas' | 'aguardando' | 'aconfirmar' | 'realizadas' | 'naocompareceu';
 interface GroupedConsultations {
   proximas: Consultation[];
   aguardando: Consultation[];
+  aconfirmar: Consultation[];
   realizadas: Consultation[];
+  naocompareceu: Consultation[];
 }
 export const ConsultationsList = () => {
   const navigate = useNavigate();
@@ -46,12 +49,22 @@ export const ConsultationsList = () => {
   const groupConsultations = (consultations: Consultation[]): GroupedConsultations => {
     const proximas: Consultation[] = [];
     const aguardando: Consultation[] = [];
+    const aconfirmar: Consultation[] = [];
     const realizadas: Consultation[] = [];
+    const naocompareceu: Consultation[] = [];
+    
     consultations.forEach(consultation => {
       if (!consultation.date) {
         aguardando.push(consultation);
-      } else if (consultation.status === 'Realizada' || consultation.date < today) {
+      } else if (consultation.status === 'Realizada') {
         realizadas.push(consultation);
+      } else if (consultation.status === 'Não Compareceu') {
+        naocompareceu.push(consultation);
+      } else if (consultation.status === 'A Confirmar') {
+        aconfirmar.push(consultation);
+      } else if (consultation.date < today && consultation.status === 'Agendada') {
+        // Consultas passadas que ainda não foram confirmadas
+        aconfirmar.push(consultation);
       } else {
         proximas.push(consultation);
       }
@@ -59,34 +72,39 @@ export const ConsultationsList = () => {
 
     // Ordenação
     proximas.sort((a, b) => a.date.getTime() - b.date.getTime());
+    aconfirmar.sort((a, b) => b.date.getTime() - a.date.getTime());
     realizadas.sort((a, b) => b.date.getTime() - a.date.getTime());
+    naocompareceu.sort((a, b) => b.date.getTime() - a.date.getTime());
+    
     return {
       proximas,
       aguardando,
-      realizadas
+      aconfirmar,
+      realizadas,
+      naocompareceu
     };
   };
   const groupedConsultations = groupConsultations(consultations);
   const getFilteredConsultations = () => {
+    const emptyGroups = {
+      proximas: [],
+      aguardando: [],
+      aconfirmar: [],
+      realizadas: [],
+      naocompareceu: []
+    };
+    
     switch (statusFilter) {
       case 'proximas':
-        return {
-          proximas: groupedConsultations.proximas,
-          aguardando: [],
-          realizadas: []
-        };
+        return { ...emptyGroups, proximas: groupedConsultations.proximas };
       case 'aguardando':
-        return {
-          proximas: [],
-          aguardando: groupedConsultations.aguardando,
-          realizadas: []
-        };
+        return { ...emptyGroups, aguardando: groupedConsultations.aguardando };
+      case 'aconfirmar':
+        return { ...emptyGroups, aconfirmar: groupedConsultations.aconfirmar };
       case 'realizadas':
-        return {
-          proximas: [],
-          aguardando: [],
-          realizadas: groupedConsultations.realizadas
-        };
+        return { ...emptyGroups, realizadas: groupedConsultations.realizadas };
+      case 'naocompareceu':
+        return { ...emptyGroups, naocompareceu: groupedConsultations.naocompareceu };
       default:
         return groupedConsultations;
     }
@@ -180,7 +198,7 @@ export const ConsultationsList = () => {
         </Card>
       </motion.div>;
   };
-  const renderGroupSection = (title: string, consultations: Consultation[], icon: React.ReactNode, emptyMessage: string) => {
+  const renderGroupSection = (title: string, consultations: Consultation[], icon: React.ReactNode, emptyMessage: string, showNudge: boolean = false) => {
     if (consultations.length === 0) return null;
     return <section className="w-full rounded-xl border bg-card overflow-hidden">
         <div className="px-4 py-3">
@@ -197,6 +215,11 @@ export const ConsultationsList = () => {
         }} transition={{
           staggerChildren: 0.1
         }}>
+            {showNudge && consultations.map((consultation, index) => 
+              consultation.status === 'Agendada' && consultation.date < today ? (
+                <ConfirmationNudge key={`nudge-${consultation.id}`} consultation={consultation} />
+              ) : null
+            )}
             {consultations.map((consultation, index) => renderConsultationCard(consultation, index))}
           </motion.div>
         </div>
@@ -245,20 +268,37 @@ export const ConsultationsList = () => {
             <CalendarClock className="h-3 w-3 mr-1" />
             Aguardando Data ({groupedConsultations.aguardando.length})
           </Button>
+          <Button variant={statusFilter === 'aconfirmar' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('aconfirmar')} className="h-8">
+            <AlertCircle className="h-3 w-3 mr-1" />
+            A Confirmar ({groupedConsultations.aconfirmar.length})
+          </Button>
           <Button variant={statusFilter === 'realizadas' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('realizadas')} className="h-8">
             <CheckCircle className="h-3 w-3 mr-1" />
             Realizadas ({groupedConsultations.realizadas.length})
+          </Button>
+          <Button variant={statusFilter === 'naocompareceu' ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter('naocompareceu')} className="h-8">
+            <XCircle className="h-3 w-3 mr-1" />
+            Não Compareceu ({groupedConsultations.naocompareceu.length})
           </Button>
         </div>
       </div>
 
       {/* Grupos de consultas */}
       <div className="space-y-6 w-full">
-        {statusFilter === 'todas' || statusFilter === 'proximas' ? renderGroupSection("Próximas Consultas", filteredGroups.proximas, <Clock className="h-4 w-4 text-blue-600" />, "Nenhuma consulta agendada") : null}
+        {(statusFilter === 'todas' || statusFilter === 'proximas') && 
+          renderGroupSection("Próximas Consultas", filteredGroups.proximas, <Clock className="h-4 w-4 text-blue-600" />, "Nenhuma consulta agendada")}
 
-        {statusFilter === 'todas' || statusFilter === 'aguardando' ? renderGroupSection("Aguardando Data", filteredGroups.aguardando, <CalendarClock className="h-4 w-4 text-amber-600" />, "Nenhuma consulta aguardando data") : null}
+        {(statusFilter === 'todas' || statusFilter === 'aguardando') && 
+          renderGroupSection("Aguardando Data", filteredGroups.aguardando, <CalendarClock className="h-4 w-4 text-amber-600" />, "Nenhuma consulta aguardando data")}
 
-        {statusFilter === 'todas' || statusFilter === 'realizadas' ? renderGroupSection("Consultas Realizadas", filteredGroups.realizadas, <CheckCircle className="h-4 w-4 text-green-600" />, "Nenhuma consulta realizada") : null}
+        {(statusFilter === 'todas' || statusFilter === 'aconfirmar') && 
+          renderGroupSection("A Confirmar", filteredGroups.aconfirmar, <AlertCircle className="h-4 w-4 text-orange-600" />, "Nenhuma consulta para confirmar", true)}
+
+        {(statusFilter === 'todas' || statusFilter === 'realizadas') && 
+          renderGroupSection("Consultas Realizadas", filteredGroups.realizadas, <CheckCircle className="h-4 w-4 text-green-600" />, "Nenhuma consulta realizada")}
+
+        {(statusFilter === 'todas' || statusFilter === 'naocompareceu') && 
+          renderGroupSection("Não Compareceu", filteredGroups.naocompareceu, <XCircle className="h-4 w-4 text-red-600" />, "Nenhuma consulta marcada como não compareceu")}
       </div>
 
       <CreateConsultationModal isOpen={createModalOpen} onClose={() => setCreateModalOpen(false)} />

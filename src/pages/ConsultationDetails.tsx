@@ -15,7 +15,10 @@ import {
   Play, 
   Upload,
   Trash2,
-  Download
+  Download,
+  CheckCircle,
+  X,
+  AlertCircle
 } from "lucide-react";
 import { useConsultations } from "@/contexts/ConsultationsContext";
 import { useRecordings } from "@/contexts/RecordingsContext";
@@ -27,7 +30,7 @@ const ConsultationDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { consultations } = useConsultations();
+  const { consultations, updateConsultation } = useConsultations();
   const { recordings } = useRecordings();
   const { getFilesByConsultation, deleteFile } = useFiles();
   const [showUpload, setShowUpload] = useState(false);
@@ -99,6 +102,28 @@ const ConsultationDetails = () => {
     });
   };
 
+  const handleMarkAsCompleted = () => {
+    if (consultation) {
+      updateConsultation(consultation.id, { status: 'Realizada' });
+      toast({
+        title: "Consulta confirmada",
+        description: "A consulta foi marcada como realizada."
+      });
+    }
+  };
+
+  const handleMarkAsNoShow = () => {
+    if (consultation) {
+      updateConsultation(consultation.id, { status: 'Não Compareceu' });
+      toast({
+        title: "Consulta marcada",
+        description: "A consulta foi marcada como não compareceu."
+      });
+    }
+  };
+
+  const isConsultationPending = consultation && consultation.date && consultation.date < new Date() && consultation.status === 'Agendada';
+
   return (
     <div className="container mx-auto p-4 pb-20">
       {/* Header */}
@@ -124,11 +149,52 @@ const ConsultationDetails = () => {
       </motion.div>
 
       <div className="space-y-6">
+        {/* Status da Consulta - Botões de Confirmação */}
+        {isConsultationPending && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <Card className="border-amber-200 bg-amber-50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-amber-900">
+                  <AlertCircle className="h-5 w-5" />
+                  Confirmar Consulta
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-amber-700 mb-4">
+                  Esta consulta já passou. Você pode confirmar se ela aconteceu ou não.
+                </p>
+                <div className="flex gap-3">
+                  <Button 
+                    onClick={handleMarkAsCompleted}
+                    className="bg-green-600 hover:bg-green-700 text-white flex-1"
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Marcar como Realizada
+                  </Button>
+                  
+                  <Button 
+                    variant="outline"
+                    onClick={handleMarkAsNoShow}
+                    className="border-red-200 text-red-700 hover:bg-red-50 flex-1"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Não Compareci
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
         {/* Informações da Consulta */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: isConsultationPending ? 0.2 : 0.1 }}
         >
           <Card>
             <CardHeader>
@@ -181,7 +247,7 @@ const ConsultationDetails = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: isConsultationPending ? 0.3 : 0.2 }}
         >
           <Card>
             <CardHeader>
@@ -234,7 +300,7 @@ const ConsultationDetails = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: isConsultationPending ? 0.4 : 0.3 }}
         >
           <Card>
             <CardHeader>

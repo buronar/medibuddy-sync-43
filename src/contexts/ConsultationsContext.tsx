@@ -8,7 +8,7 @@ export interface Consultation {
   address?: string;
   notes?: string;
   recordingId?: string;
-  status: 'Agendada' | 'Realizada';
+  status: 'Agendada' | 'Realizada' | 'A Confirmar' | 'Não Compareceu';
   appointmentType?: 'presential' | 'telemedicine';
 }
 
