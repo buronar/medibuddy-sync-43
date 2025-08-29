@@ -135,15 +135,47 @@ export const CreateConsultationModal = ({ isOpen, onClose }: CreateConsultationM
     const consultationDate = new Date(selectedDate);
     consultationDate.setHours(hours, minutes, 0, 0);
 
+    const consultationId = Date.now().toString();
+    
+    // Criar lembretes se habilitado e data futura
+    let reminders: any[] = [];
+    if (formData.reminderEnabled && !isDateInPast) {
+      const calculateReminderTime = (consultationDate: Date, type: string): Date => {
+        const reminderTime = new Date(consultationDate);
+        switch (type) {
+          case '1day':
+            reminderTime.setDate(reminderTime.getDate() - 1);
+            break;
+          case '3hours':
+            reminderTime.setHours(reminderTime.getHours() - 3);
+            break;
+          case '1hour':
+            reminderTime.setHours(reminderTime.getHours() - 1);
+            break;
+        }
+        return reminderTime;
+      };
+
+      const reminder = {
+        id: `${consultationId}-${formData.reminderTime}`,
+        consultationId,
+        type: formData.reminderTime,
+        scheduledTime: calculateReminderTime(consultationDate, formData.reminderTime),
+        delivered: false
+      };
+      reminders = [reminder];
+    }
+
     const newConsultation = {
-      id: Date.now().toString(),
+      id: consultationId,
       doctor: formData.doctor || undefined,
       specialty: formData.specialty,
       date: consultationDate,
       address: formData.appointmentType === "telemedicine" ? undefined : formData.address,
       notes: formData.notes || undefined,
       status: isDateInPast ? 'Realizada' as const : 'Agendada' as const,
-      appointmentType: formData.appointmentType as 'presential' | 'telemedicine'
+      appointmentType: formData.appointmentType as 'presential' | 'telemedicine',
+      reminders: reminders.length > 0 ? reminders : undefined
     };
 
     addConsultation(newConsultation);

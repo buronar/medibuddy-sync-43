@@ -1,5 +1,13 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+export interface Reminder {
+  id: string;
+  consultationId: string;
+  type: '1day' | '3hours' | '1hour';
+  scheduledTime: Date;
+  delivered: boolean;
+}
+
 export interface Consultation {
   id: string;
   doctor?: string;
@@ -11,6 +19,7 @@ export interface Consultation {
   status: 'Agendada' | 'Realizada' | 'A Confirmar' | 'Não Compareceu';
   appointmentType?: 'presential' | 'telemedicine';
   patientNotes?: string;
+  reminders?: Reminder[];
 }
 
 interface ConsultationsContextType {
@@ -19,6 +28,8 @@ interface ConsultationsContextType {
   deleteConsultation: (id: string) => void;
   updateConsultation: (id: string, updates: Partial<Consultation>) => void;
   associateRecording: (consultationId: string, recordingId: string) => void;
+  addReminder: (consultationId: string, reminderType: '1day' | '3hours' | '1hour') => void;
+  removeReminder: (consultationId: string, reminderType: '1day' | '3hours' | '1hour') => void;
 }
 
 const ConsultationsContext = createContext<ConsultationsContextType | undefined>(undefined);
@@ -84,13 +95,62 @@ export const ConsultationsProvider = ({ children }: ConsultationsProviderProps) 
     updateConsultation(consultationId, { recordingId });
   };
 
+  const calculateReminderTime = (consultationDate: Date, type: '1day' | '3hours' | '1hour'): Date => {
+    const reminderTime = new Date(consultationDate);
+    switch (type) {
+      case '1day':
+        reminderTime.setDate(reminderTime.getDate() - 1);
+        break;
+      case '3hours':
+        reminderTime.setHours(reminderTime.getHours() - 3);
+        break;
+      case '1hour':
+        reminderTime.setHours(reminderTime.getHours() - 1);
+        break;
+    }
+    return reminderTime;
+  };
+
+  const addReminder = (consultationId: string, reminderType: '1day' | '3hours' | '1hour') => {
+    const consultation = consultations.find(c => c.id === consultationId);
+    if (!consultation) return;
+
+    const scheduledTime = calculateReminderTime(consultation.date, reminderType);
+    const newReminder: Reminder = {
+      id: `${consultationId}-${reminderType}`,
+      consultationId,
+      type: reminderType,
+      scheduledTime,
+      delivered: false
+    };
+
+    updateConsultation(consultationId, {
+      reminders: [...(consultation.reminders || []), newReminder]
+    });
+  };
+
+  const removeReminder = (consultationId: string, reminderType: '1day' | '3hours' | '1hour') => {
+    const consultation = consultations.find(c => c.id === consultationId);
+    if (!consultation) return;
+
+    const updatedReminders = (consultation.reminders || []).filter(
+      r => r.type !== reminderType
+    );
+
+    updateConsultation(consultationId, {
+      reminders: updatedReminders
+    });
+  };
+
   return (
     <ConsultationsContext.Provider value={{
       consultations,
       addConsultation,
       deleteConsultation,
       updateConsultation,
-      associateRecording
+      associateRecording,
+      addReminder,
+      removeReminder
     }}>
       {children}
     </ConsultationsContext.Provider>

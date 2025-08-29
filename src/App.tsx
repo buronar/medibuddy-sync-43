@@ -10,6 +10,7 @@ import { RecordingsProvider } from "@/contexts/RecordingsContext";
 import { ConsultationsProvider } from "@/contexts/ConsultationsContext";
 import { FilesProvider } from "@/contexts/FilesContext";
 import { MedicationsProvider } from "@/contexts/MedicationsContext";
+import { useReminders } from "@/hooks/useReminders";
 import { AppLayout } from "@/components/AppLayout";
 import { PageTransition } from "@/components/PageTransition";
 import OnboardingRedirect from "@/components/OnboardingRedirect";
@@ -22,11 +23,18 @@ import Agenda from "./pages/Agenda";
 import Assistente from "./pages/Assistente";
 import Medicamentos from "./pages/Medicamentos";
 import Perfil from "./pages/Perfil";
+import { Lembretes } from "./pages/Lembretes";
 import { Mais } from "./pages/Mais";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+// Componente para ativar o sistema de lembretes em background
+const ReminderService = () => {
+  useReminders();
+  return null;
+};
 
 const getPageInfo = (pathname: string) => {
   switch (pathname) {
@@ -65,6 +73,11 @@ const getPageInfo = (pathname: string) => {
       return {
         title: "Meu Perfil",
         subtitle: "Gerencie suas informações pessoais e preferências"
+      };
+    case "/lembretes":
+      return {
+        title: "Meus Lembretes",
+        subtitle: "Acompanhe todos os seus lembretes de consultas"
       };
     case "/mais":
       return {
@@ -123,6 +136,7 @@ const AppContent = () => {
             <Route path="/agenda" element={<Agenda />} />
             <Route path="/assistente" element={<Assistente />} />
             <Route path="/assistente/:id" element={<Assistente />} />
+            <Route path="/lembretes" element={<Lembretes />} />
             <Route path="/perfil" element={<Perfil />} />
             <Route path="/mais" element={<Mais />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
@@ -146,6 +160,7 @@ const App = () => {
             <ConsultationsProvider>
               <FilesProvider>
                 <MedicationsProvider>
+                  <ReminderService />
                 <BrowserRouter>
                   <AppContent />
                   </BrowserRouter>

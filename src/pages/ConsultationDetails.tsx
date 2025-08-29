@@ -26,6 +26,7 @@ import { useFiles } from "@/contexts/FilesContext";
 import { CategorizedFilesSection } from "@/components/CategorizedFilesSection";
 import { PatientNotesSection } from "@/components/PatientNotesSection";
 import { AIAnalysisSection } from "@/components/AIAnalysisSection";
+import { ReminderSettings } from "@/components/ReminderSettings";
 import { useToast } from "@/hooks/use-toast";
 
 const ConsultationDetails = () => {
@@ -293,6 +294,15 @@ const ConsultationDetails = () => {
 
         {/* Notas do Paciente */}
         <PatientNotesSection consultationId={consultation.id} />
+
+        {/* Configurações de Lembretes */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <ReminderSettings consultation={consultation} />
+        </motion.div>
 
         {/* Análise Inteligente da Consulta */}
         <AIAnalysisSection consultationId={consultation.id} />
