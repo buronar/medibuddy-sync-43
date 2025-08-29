@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
+export type FileCategory = 'receita' | 'exame' | 'laudo' | 'solicitacao' | 'outro';
+
 export interface AttachedFile {
   id: string;
   name: string;
@@ -8,13 +10,16 @@ export interface AttachedFile {
   url: string; // Simulated URL
   uploadDate: Date;
   consultationId: string;
+  category: FileCategory;
 }
 
 interface FilesContextType {
   files: AttachedFile[];
   addFile: (file: AttachedFile) => void;
   deleteFile: (id: string) => void;
+  updateFile: (id: string, updates: Partial<AttachedFile>) => void;
   getFilesByConsultation: (consultationId: string) => AttachedFile[];
+  getFilesByCategory: (consultationId: string, category: FileCategory) => AttachedFile[];
 }
 
 const FilesContext = createContext<FilesContextType | undefined>(undefined);
@@ -68,8 +73,20 @@ export const FilesProvider = ({ children }: FilesProviderProps) => {
     setFiles(prev => prev.filter(file => file.id !== id));
   };
 
+  const updateFile = (id: string, updates: Partial<AttachedFile>) => {
+    setFiles(prev => prev.map(file => 
+      file.id === id ? { ...file, ...updates } : file
+    ));
+  };
+
   const getFilesByConsultation = (consultationId: string) => {
     return files.filter(file => file.consultationId === consultationId);
+  };
+
+  const getFilesByCategory = (consultationId: string, category: FileCategory) => {
+    return files.filter(file => 
+      file.consultationId === consultationId && file.category === category
+    );
   };
 
   return (
@@ -77,7 +94,9 @@ export const FilesProvider = ({ children }: FilesProviderProps) => {
       files,
       addFile,
       deleteFile,
-      getFilesByConsultation
+      updateFile,
+      getFilesByConsultation,
+      getFilesByCategory
     }}>
       {children}
     </FilesContext.Provider>

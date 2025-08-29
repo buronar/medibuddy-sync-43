@@ -10,6 +10,7 @@ export interface Consultation {
   recordingId?: string;
   status: 'Agendada' | 'Realizada' | 'A Confirmar' | 'Não Compareceu';
   appointmentType?: 'presential' | 'telemedicine';
+  patientNotes?: string;
 }
 
 interface ConsultationsContextType {

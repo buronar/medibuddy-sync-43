@@ -23,7 +23,9 @@ import {
 import { useConsultations } from "@/contexts/ConsultationsContext";
 import { useRecordings } from "@/contexts/RecordingsContext";
 import { useFiles } from "@/contexts/FilesContext";
-import { FileUploadSection } from "@/components/FileUploadSection";
+import { CategorizedFilesSection } from "@/components/CategorizedFilesSection";
+import { PatientNotesSection } from "@/components/PatientNotesSection";
+import { AIAnalysisSection } from "@/components/AIAnalysisSection";
 import { useToast } from "@/hooks/use-toast";
 
 const ConsultationDetails = () => {
@@ -32,14 +34,12 @@ const ConsultationDetails = () => {
   const { toast } = useToast();
   const { consultations, updateConsultation } = useConsultations();
   const { recordings } = useRecordings();
-  const { getFilesByConsultation, deleteFile } = useFiles();
-  const [showUpload, setShowUpload] = useState(false);
+  const { getFilesByConsultation } = useFiles();
 
   const consultation = consultations.find(c => c.id === id);
   const consultationRecordings = recordings.filter(r => 
     consultation?.recordingId === r.id
   );
-  const attachedFiles = consultation ? getFilesByConsultation(consultation.id) : [];
 
   if (!consultation) {
     return (
@@ -87,20 +87,6 @@ const ConsultationDetails = () => {
     }
   };
 
-  const handleDownloadFile = (file: any) => {
-    toast({
-      title: "Download iniciado",
-      description: `Simulando download de ${file.name}`,
-    });
-  };
-
-  const handleDeleteFile = (fileId: string) => {
-    deleteFile(fileId);
-    toast({
-      title: "Arquivo excluído",
-      description: "O arquivo foi removido com sucesso.",
-    });
-  };
 
   const handleMarkAsCompleted = () => {
     if (consultation) {
@@ -122,7 +108,7 @@ const ConsultationDetails = () => {
     }
   };
 
-  const isConsultationPending = consultation && consultation.date && consultation.date < new Date() && consultation.status === 'Agendada';
+  const isConsultationPending = consultation && consultation.status === 'A Confirmar';
 
   return (
     <div className="container mx-auto p-4 pb-20">
@@ -296,90 +282,20 @@ const ConsultationDetails = () => {
           </Card>
         </motion.div>
 
-        {/* Arquivos Anexados */}
+        {/* Arquivos Anexados Categorizados */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: isConsultationPending ? 0.4 : 0.3 }}
         >
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Arquivos Anexados ({attachedFiles.length})
-                </CardTitle>
-                <Button
-                  size="sm"
-                  onClick={() => setShowUpload(!showUpload)}
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Anexar Arquivo
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {showUpload && (
-                <FileUploadSection
-                  consultationId={consultation.id}
-                  onUploadComplete={() => setShowUpload(false)}
-                />
-              )}
-
-              {attachedFiles.length > 0 ? (
-                <div className="space-y-3">
-                  {attachedFiles.map((file) => (
-                    <motion.div
-                      key={file.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="flex items-center gap-3 p-3 border rounded-lg hover:bg-secondary/30 transition-colors"
-                    >
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <FileText className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium text-sm">{file.name}</p>
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                          <span>{formatFileSize(file.size)}</span>
-                          <Badge variant="secondary" className="text-xs">
-                            {file.type.toUpperCase()}
-                          </Badge>
-                          <span>{formatDate(file.uploadDate)}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleDownloadFile(file)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleDeleteFile(file.id)}
-                          className="h-8 w-8 p-0 text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    Nenhum arquivo anexado a esta consulta
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <CategorizedFilesSection consultationId={consultation.id} />
         </motion.div>
+
+        {/* Notas do Paciente */}
+        <PatientNotesSection consultationId={consultation.id} />
+
+        {/* Análise Inteligente da Consulta */}
+        <AIAnalysisSection consultationId={consultation.id} />
       </div>
     </div>
   );

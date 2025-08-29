@@ -4,22 +4,32 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, X, FileText, AlertCircle } from "lucide-react";
-import { useFiles } from "@/contexts/FilesContext";
+import { useFiles, FileCategory } from "@/contexts/FilesContext";
 import { useToast } from "@/hooks/use-toast";
 
-interface FileUploadSectionProps {
+interface CategorizedFileUploadProps {
   consultationId: string;
   onUploadComplete?: () => void;
 }
 
-export const FileUploadSection = ({ 
+const categoryLabels: Record<FileCategory, string> = {
+  receita: 'Receita',
+  exame: 'Exame',
+  laudo: 'Laudo',
+  solicitacao: 'Solicitação',
+  outro: 'Outro'
+};
+
+export const CategorizedFileUpload = ({ 
   consultationId, 
   onUploadComplete 
-}: FileUploadSectionProps) => {
+}: CategorizedFileUploadProps) => {
   const { addFile } = useFiles();
   const { toast } = useToast();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<FileCategory>('outro');
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -63,10 +73,7 @@ export const FileUploadSection = ({
   };
 
   const simulateUpload = async (file: File): Promise<string> => {
-    // Simular delay de upload
     await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-    
-    // Simular URL do arquivo
     return `https://simulated-storage.example.com/files/${consultationId}/${file.name}`;
   };
 
@@ -87,7 +94,7 @@ export const FileUploadSection = ({
           url: simulatedUrl,
           uploadDate: new Date(),
           consultationId,
-          category: 'outro' as const
+          category: selectedCategory
         };
 
         addFile(attachedFile);
@@ -95,7 +102,7 @@ export const FileUploadSection = ({
 
       toast({
         title: "Upload concluído",
-        description: `${selectedFiles.length} arquivo(s) anexado(s) com sucesso.`,
+        description: `${selectedFiles.length} arquivo(s) anexado(s) em ${categoryLabels[selectedCategory]}.`,
       });
 
       setSelectedFiles([]);
@@ -126,30 +133,50 @@ export const FileUploadSection = ({
       exit={{ opacity: 0, height: 0 }}
       className="space-y-4"
     >
-      <Card className="border-dashed border-2 border-primary/20">
-        <CardContent className="pt-6">
-          <div className="text-center">
-            <Upload className="h-8 w-8 text-primary mx-auto mb-4" />
-            <Label htmlFor="file-upload" className="cursor-pointer">
-              <span className="text-sm font-medium">
-                Clique para selecionar arquivos
-              </span>
-              <p className="text-xs text-muted-foreground mt-1">
-                PDF, JPG, PNG até 10MB
-              </p>
-            </Label>
-            <Input
-              ref={fileInputRef}
-              id="file-upload"
-              type="file"
-              multiple
-              accept={acceptedTypes.join(',')}
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-3">
+        <div>
+          <Label htmlFor="category-select" className="text-sm font-medium">
+            Categoria do arquivo
+          </Label>
+          <Select value={selectedCategory} onValueChange={(value: FileCategory) => setSelectedCategory(value)}>
+            <SelectTrigger id="category-select" className="mt-1">
+              <SelectValue placeholder="Selecione uma categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(categoryLabels).map(([key, label]) => (
+                <SelectItem key={key} value={key}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <Card className="border-dashed border-2 border-primary/20">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <Upload className="h-8 w-8 text-primary mx-auto mb-4" />
+              <Label htmlFor="file-upload" className="cursor-pointer">
+                <span className="text-sm font-medium">
+                  Clique para selecionar arquivos
+                </span>
+                <p className="text-xs text-muted-foreground mt-1">
+                  PDF, JPG, PNG até 10MB
+                </p>
+              </Label>
+              <Input
+                ref={fileInputRef}
+                id="file-upload"
+                type="file"
+                multiple
+                accept={acceptedTypes.join(',')}
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {selectedFiles.length > 0 && (
         <motion.div
@@ -182,7 +209,7 @@ export const FileUploadSection = ({
                 <div className="flex-1">
                   <p className="text-sm font-medium">{file.name}</p>
                   <p className="text-xs text-muted-foreground">
-                    {formatFileSize(file.size)}
+                    {formatFileSize(file.size)} • {categoryLabels[selectedCategory]}
                   </p>
                 </div>
                 <Button
@@ -201,8 +228,8 @@ export const FileUploadSection = ({
           <div className="flex items-start gap-2 text-xs text-muted-foreground bg-blue-50 p-3 rounded-lg">
             <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
             <p>
-              Os arquivos serão anexados diretamente a esta consulta e estarão 
-              disponíveis sempre que você acessar os detalhes.
+              Os arquivos serão categorizados como <strong>{categoryLabels[selectedCategory]}</strong> e 
+              anexados a esta consulta.
             </p>
           </div>
         </motion.div>
