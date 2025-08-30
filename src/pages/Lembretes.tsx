@@ -13,7 +13,7 @@ const REMINDER_LABELS = {
   '1hour': '1 hora antes'
 };
 
-export const Lembretes = () => {
+const Lembretes = () => {
   const { consultations } = useConsultations();
   const navigate = useNavigate();
 
@@ -156,3 +156,5 @@ export const Lembretes = () => {
     </div>
   );
 };
+
+export default Lembretes;

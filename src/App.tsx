@@ -23,7 +23,7 @@ import Agenda from "./pages/Agenda";
 import Assistente from "./pages/Assistente";
 import Medicamentos from "./pages/Medicamentos";
 import Perfil from "./pages/Perfil";
-import { Lembretes } from "./pages/Lembretes";
+import Lembretes from "./pages/Lembretes";
 import { Mais } from "./pages/Mais";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
