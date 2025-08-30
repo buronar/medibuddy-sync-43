@@ -16,7 +16,7 @@ export interface Consultation {
   address?: string;
   notes?: string;
   recordingId?: string;
-  status: 'Agendada' | 'Realizada' | 'A Confirmar' | 'Não Compareceu';
+  status: 'Agendada' | 'Aguardando Data' | 'A Confirmar' | 'Realizada' | 'Não Compareceu';
   appointmentType?: 'presential' | 'telemedicine';
   patientNotes?: string;
   reminders?: Reminder[];
@@ -66,6 +66,24 @@ const loadConsultationsFromStorage = (): Consultation[] => {
 
 export const ConsultationsProvider = ({ children }: ConsultationsProviderProps) => {
   const [consultations, setConsultations] = useState<Consultation[]>(loadConsultationsFromStorage);
+
+  // Auto-transition logic - check for consultations that need status update
+  useEffect(() => {
+    const now = new Date();
+    let hasUpdates = false;
+    
+    const updatedConsultations = consultations.map(consultation => {
+      if (consultation.status === 'Agendada' && consultation.date && consultation.date < now) {
+        hasUpdates = true;
+        return { ...consultation, status: 'A Confirmar' as const };
+      }
+      return consultation;
+    });
+    
+    if (hasUpdates) {
+      setConsultations(updatedConsultations);
+    }
+  }, [consultations]);
 
   useEffect(() => {
     try {

@@ -62,9 +62,6 @@ export const ConsultationsList = () => {
         naocompareceu.push(consultation);
       } else if (consultation.status === 'A Confirmar') {
         aconfirmar.push(consultation);
-      } else if (consultation.date < today && consultation.status === 'Agendada') {
-        // Consultas passadas que ainda não foram confirmadas
-        aconfirmar.push(consultation);
       } else {
         proximas.push(consultation);
       }
@@ -216,7 +213,7 @@ export const ConsultationsList = () => {
           staggerChildren: 0.1
         }}>
             {showNudge && consultations.map((consultation, index) => 
-              consultation.status === 'Agendada' && consultation.date < today ? (
+              consultation.status === 'A Confirmar' ? (
                 <ConfirmationNudge key={`nudge-${consultation.id}`} consultation={consultation} />
               ) : null
             )}
