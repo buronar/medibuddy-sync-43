@@ -160,9 +160,9 @@ const App = () => {
             <ConsultationsProvider>
               <FilesProvider>
                 <MedicationsProvider>
-                  <ReminderService />
-                <BrowserRouter>
-                  <AppContent />
+                  <BrowserRouter>
+                    <ReminderService />
+                    <AppContent />
                   </BrowserRouter>
                 </MedicationsProvider>
               </FilesProvider>
