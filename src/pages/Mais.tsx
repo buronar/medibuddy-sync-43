@@ -10,7 +10,8 @@ import {
   LogOut,
   Calendar,
   Activity,
-  Pill
+  Pill,
+  Bell
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -45,6 +46,12 @@ const menuItems = [
     label: "Meus Arquivos", 
     href: "/arquivos",
     description: "Documentos e exames médicos"
+  },
+  {
+    icon: Bell,
+    label: "Lembretes",
+    href: "/lembretes",
+    description: "Acompanhe todos os seus lembretes de consultas"
   },
   {
     icon: Settings,
