@@ -10,7 +10,7 @@ import { RecordingsProvider } from "@/contexts/RecordingsContext";
 import { ConsultationsProvider } from "@/contexts/ConsultationsContext";
 import { FilesProvider } from "@/contexts/FilesContext";
 import { MedicationsProvider } from "@/contexts/MedicationsContext";
-import { useReminders } from "@/hooks/useReminders";
+import { ReminderService } from "@/components/ReminderService";
 import { AppLayout } from "@/components/AppLayout";
 import { PageTransition } from "@/components/PageTransition";
 import OnboardingRedirect from "@/components/OnboardingRedirect";
@@ -31,10 +31,10 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 // Componente para ativar o sistema de lembretes em background
-const ReminderService = () => {
-  useReminders();
-  return null;
-};
+// const ReminderService = () => {
+//   useReminders();
+//   return null;
+// };
 
 const getPageInfo = (pathname: string) => {
   switch (pathname) {
@@ -124,6 +124,7 @@ const AppContent = () => {
 
   return (
     <OnboardingRedirect>
+      <ReminderService />
       <AppLayout title={title} subtitle={subtitle}>
         <PageTransition location={location.pathname}>
           <Routes location={location}>
@@ -161,7 +162,6 @@ const App = () => {
               <FilesProvider>
                 <MedicationsProvider>
                   <BrowserRouter>
-                    <ReminderService />
                     <AppContent />
                   </BrowserRouter>
                 </MedicationsProvider>

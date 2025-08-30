@@ -1,3 +1,4 @@
+
 import { useEffect, useCallback } from 'react';
 import { useConsultations } from '@/contexts/ConsultationsContext';
 import { useToast } from '@/hooks/use-toast';
@@ -31,7 +32,15 @@ export const useReminders = () => {
             description: reminderText,
             action: (
               <button 
-                onClick={() => navigate(`/consultas/${consultation.id}`)}
+                onClick={() => {
+                  try {
+                    navigate(`/consultas/${consultation.id}`);
+                  } catch (error) {
+                    console.warn('Navigation error:', error);
+                    // Fallback: reload page to consultation
+                    window.location.href = `/consultas/${consultation.id}`;
+                  }
+                }}
                 className="text-sm font-medium text-primary hover:underline"
               >
                 Ver consulta
