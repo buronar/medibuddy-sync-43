@@ -34,7 +34,7 @@ export const ConfirmationNudge = ({ consultation }: ConfirmationNudgeProps) => {
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="mb-3"
+      className="w-full"
     >
       <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20">
         <CardContent className="p-4">

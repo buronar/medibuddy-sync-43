@@ -198,13 +198,13 @@ export const ConsultationsList = () => {
   const renderGroupSection = (title: string, consultations: Consultation[], icon: React.ReactNode, emptyMessage: string, showNudge: boolean = false) => {
     if (consultations.length === 0) return null;
     return <section className="w-full rounded-xl border bg-card overflow-hidden">
-        <div className="px-4 py-3">
+        <div className="py-3">
           <div className="text-base font-semibold flex items-center gap-2">
             {icon}
             {title} ({consultations.length})
           </div>
         </div>
-        <div className="px-4 pb-4">
+        <div className="pb-4">
           <motion.div className="space-y-3" initial={{
           opacity: 0
         }} animate={{
