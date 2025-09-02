@@ -223,7 +223,7 @@ export const ConsultationsList = () => {
       </section>;
   };
   if (consultations.length === 0) {
-    return <div className="max-w-md mx-auto px-4">
+    return <div className="w-full">
         <Card className="text-center py-12">
           <CardContent>
             <Stethoscope className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -241,7 +241,7 @@ export const ConsultationsList = () => {
         <CreateConsultationModal isOpen={createModalOpen} onClose={() => setCreateModalOpen(false)} />
       </div>;
   }
-  return <div className="max-w-md mx-auto px-4 space-y-6">
+  return <div className="w-full space-y-6">
       {/* Header com filtros */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between flex-wrap gap-2">
