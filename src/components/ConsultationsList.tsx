@@ -138,7 +138,7 @@ export const ConsultationsList = () => {
     }} transition={{
       delay: index * 0.1
     }}>
-        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate(`/consultas/${consultation.id}`)}>
+        <Card className="w-full rounded-lg border bg-background shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate(`/consultas/${consultation.id}`)}>
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
               <div className="p-2 bg-primary/10 rounded-lg">
@@ -197,29 +197,25 @@ export const ConsultationsList = () => {
   };
   const renderGroupSection = (title: string, consultations: Consultation[], icon: React.ReactNode, emptyMessage: string, showNudge: boolean = false) => {
     if (consultations.length === 0) return null;
-    return <section className="w-full rounded-xl border bg-card overflow-hidden">
-        <div className="py-3">
-          <div className="text-base font-semibold flex items-center gap-2">
-            {icon}
-            {title} ({consultations.length})
-          </div>
+    return <section className="w-full rounded-xl border bg-background p-4 space-y-3">
+        <div className="text-base font-semibold flex items-center gap-2">
+          {icon}
+          {title} ({consultations.length})
         </div>
-        <div className="pb-4">
-          <motion.div className="space-y-3" initial={{
-          opacity: 0
-        }} animate={{
-          opacity: 1
-        }} transition={{
-          staggerChildren: 0.1
-        }}>
-            {showNudge && consultations.map((consultation, index) => 
-              consultation.status === 'A Confirmar' ? (
-                <ConfirmationNudge key={`nudge-${consultation.id}`} consultation={consultation} />
-              ) : null
-            )}
-            {consultations.map((consultation, index) => renderConsultationCard(consultation, index))}
-          </motion.div>
-        </div>
+        <motion.div className="space-y-3" initial={{
+        opacity: 0
+      }} animate={{
+        opacity: 1
+      }} transition={{
+        staggerChildren: 0.1
+      }}>
+          {showNudge && consultations.map((consultation, index) => 
+            consultation.status === 'A Confirmar' ? (
+              <ConfirmationNudge key={`nudge-${consultation.id}`} consultation={consultation} />
+            ) : null
+          )}
+          {consultations.map((consultation, index) => renderConsultationCard(consultation, index))}
+        </motion.div>
       </section>;
   };
   if (consultations.length === 0) {
